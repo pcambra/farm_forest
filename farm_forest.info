@@ -1,0 +1,4 @@
+name = Farm Forest
+description = Forest management features for farmOS.
+package = farmOS Contrib
+core = 7.x
