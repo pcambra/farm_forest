@@ -1,7 +1,7 @@
 name = Farm Forest
 description = Forest management features for farmOS.
-package = farmOS Contrib
 core = 7.x
+package = farmOS Contrib
 dependencies[] = ctools
 dependencies[] = entity
 dependencies[] = farm_area
