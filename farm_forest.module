@@ -16,6 +16,7 @@ function farm_forest_farm_ui_entities() {
       'forest_plantation' => array(
         'label' => t('Forest Plantation Plan'),
         'label_plural' => t('Forest Plantation Plans'),
+        'view' => 'farm_forest_plantation_plan',
       ),
     ),
   );
