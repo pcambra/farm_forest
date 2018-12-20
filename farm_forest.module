@@ -4,3 +4,19 @@
  * @file
  * farmOS forest management module.
  */
+
+include_once 'farm_forest.features.inc';
+
+/**
+ * Implements hook_farm_ui_entities().
+ */
+function farm_forest_farm_ui_entities() {
+  return array(
+    'farm_plan' => array(
+      'forest_plantation' => array(
+        'label' => t('Forest Plantation Plan'),
+        'label_plural' => t('Forest Plantation Plans'),
+      ),
+    ),
+  );
+}
