@@ -43,6 +43,11 @@ function farm_forest_help($path, $arg) {
       $help = '<p>' . t('This page summarizes the details of this forest plan.') . '</p>';
       $help .= '<p>' . t('To edit the plan, click the "Settings" tab.') . '</p>';
       return $help;
+
+    // Area selection form.
+    case 'farm/plan/%/area':
+      $help = '<p>' . t('Select the area(s) that will be part of this plan.') . '</p>';
+      return $help;
   }
 }
 
@@ -59,4 +64,79 @@ function farm_forest_farm_ui_entities() {
       ),
     ),
   );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function farm_forest_menu() {
+
+  // Area selection form.
+  $items['farm/plan/%farm_plan/area'] = array(
+    'title' => 'Area',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('farm_forest_plan_area_form', 2),
+    'access callback' => 'farm_forest_plan_access',
+    'access arguments' => array(2),
+    'file' => 'farm_forest.plan.area.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+  );
+
+  return $items;
+}
+
+/**
+ * Access callback for forest plan tabs.
+ */
+function farm_forest_plan_access($plan) {
+
+  // If the plan is not a forest plan, deny access.
+  if ($plan->type != 'forest') {
+    return FALSE;
+  }
+
+  // Defer to the farm plan access callback.
+  return farm_plan_access('update', $plan);
+}
+
+
+/**
+ * Implements hook_page_build().
+ */
+function farm_forest_page_build(&$page) {
+
+  // Get the current path.
+  $path = current_path();
+
+  // Break it up into parts.
+  $path_parts = explode('/', $path);
+
+  // If this is not a plan area selection path, bail.
+  if (count($path_parts) < 4 || !($path_parts[0] == 'farm' && $path_parts[1] == 'plan' && $path_parts[3] == 'area' && empty($path_parts[4]))) {
+    return;
+  }
+
+  // Attempt to load the plan. Bail if unsuccessful.
+  $plan = menu_get_object('farm_plan', 2);
+  if (empty($plan)) {
+    return;
+  }
+
+  // If the plan is not a forest plan, bail.
+  if ($plan->type !== 'forest') {
+    return;
+  }
+
+  // Build the areas map and add it to the page content.
+  $page['content']['farm_areas'] = farm_map_build('farm_areas');
+
+  // Set the weight to 100 so that it appears on bottom.
+  $page['content']['farm_areas']['#weight'] = 100;
+
+  // Set the content region #sorted flag to FALSE so that it resorts.
+  $page['content']['#sorted'] = FALSE;
+
+  // Add area selection javascript.
+  drupal_add_js(drupal_get_path('module', 'farm_forest') . '/js/farm_forest_plan_area.js');
 }
