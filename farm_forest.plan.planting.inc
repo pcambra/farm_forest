@@ -124,16 +124,13 @@ function farm_forest_plan_planting_details_form($planting=NULL) {
     $defaults['species'] = $planting_wrapper->field_farm_crop->label();
 
     // Find transplanting logs that reference the planting.
-    $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', 'log');
-    $query->entityCondition('bundle', 'farm_transplanting');
-    $query->fieldCondition('field_farm_asset', 'target_id', $planting->id);
-    $query->propertyOrderBy('id', 'ASC');
+    $query = farm_log_asset_query($planting->id, 0, NULL, 'farm_transplanting');
+    $query->addField('ss_log', 'id');
     $result = $query->execute();
-    if (isset($result['log'])) {
-      $log_ids = array_keys($result['log']);
-      $log_id = reset($log_ids);
-      $transplanting_log = log_load($log_id);
+    foreach ($result as $row) {
+      if (!empty($row->id)) {
+        $transplanting_log = log_load($row->id);
+      }
     }
 
     // If a log was found, get default values from it.
@@ -300,6 +297,82 @@ function farm_forest_plan_planting_form_submit($form, &$form_state) {
     // If there are quantity measurements, add them to the log.
     if (!empty($measurements)) {
       farm_quantity_log_add_measurements($log, $measurements);
+    }
+  }
+
+  // Iterate through existing plantings and update as necessary.
+  if (!empty($form_state['values']['plantings'])) {
+    foreach ($form_state['values']['plantings'] as $planting_id => $planting_values) {
+
+      // Keep track of what was updated, so we can set a message afterwards.
+      $updated_planting = FALSE;
+      $updated_transplanting = FALSE;
+
+      // If the species changed, update the planting.
+      if ($planting_values['species'] != $form['plantings'][$planting_id]['species']['#default_value']) {
+
+        // Get an entity metadata wrappers for the planting.
+        $planting_wrapper = entity_metadata_wrapper('farm_asset', $planting_values['planting']);
+
+        // Get the species term (or create a new one), and add it to the planting.
+        $species = farm_term($planting_values['species'], 'farm_crops');
+        $planting_wrapper->field_farm_crop->set(array(NULL));
+        $planting_wrapper->field_farm_crop[] = $species;
+
+        // Save the planting.
+        $planting_wrapper->save();
+
+        // Remember that the planting was updated.
+        $updated_planting = TRUE;
+      }
+
+      // If the planting date changed, update the log.
+      if ($planting_values['transplanting']['date'] != $form['plantings'][$planting_id]['transplanting']['date']['#default_value']) {
+
+        // Update the log timestamp.
+        $timestamp = strtotime($planting_values['transplanting']['date']);
+        $planting_values['planting']['transplanting']['log']->timestamp = $timestamp;
+        log_save($planting_values['planting']['transplanting']['log']);
+
+        // Remember that the transplanting was updated.
+        $updated_transplanting = TRUE;
+      }
+
+      // If the count changed, update the log.
+      if ($planting_values['transplanting']['count'] != $form['plantings'][$planting_id]['transplanting']['count']['#default_value']) {
+
+        // Update the 'total planted' quantity measurement.
+        $log = $planting_values['transplanting']['log'];
+        $value = $planting_values['transplanting']['count'];
+        farm_quantity_log_update_measurement_by_label($log, 'total planted', $value);
+
+        // Remember that the transplanting was updated.
+        $updated_transplanting = TRUE;
+      }
+
+      // If the spacing changed, update the log.
+      if ($planting_values['transplanting']['spacing'] != $form['plantings'][$planting_id]['transplanting']['spacing']['#default_value']) {
+
+        // Update the 'tree spacing' quantity measurement.
+        $log = $planting_values['transplanting']['log'];
+        $value = $planting_values['transplanting']['spacing'];
+        farm_quantity_log_update_measurement_by_label($log, 'tree spacing', $value);
+
+        // Remember that the transplanting was updated.
+        $updated_transplanting = TRUE;
+      }
+
+      // If the planting was updated, display a message.
+      if ($updated_planting) {
+        $planting_name = entity_label('farm_asset', $planting_values['planting']);
+        drupal_set_message(t('The planting asset %planting_name was updated.', array('%planting_name' => $planting_name)));
+      }
+
+      // If the transplanting was updated, display a message.
+      if ($updated_transplanting) {
+        $transplanting_name = entity_label('log', $planting_values['transplanting']['log']);
+        drupal_set_message(t('The transplanting log %transplanting_name was updated.', array('%transplanting_name' => $transplanting_name)));
+      }
     }
   }
 }
