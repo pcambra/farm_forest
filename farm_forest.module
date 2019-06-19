@@ -53,6 +53,11 @@ function farm_forest_help($path, $arg) {
     case 'farm/plan/%/planting':
       $help = '<p>' . t('Add planting(s) to this forest plan.') . '</p>';
       return $help;
+
+    // Management form.
+    case 'farm/plan/%/management':
+      $help = '<p>' . t('Add forest management tasks to the plan.') . '</p>';
+      return $help;
   }
 }
 
@@ -98,6 +103,18 @@ function farm_forest_menu() {
     'file' => 'farm_forest.plan.planting.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 20,
+  );
+
+  // Management form.
+  $items['farm/plan/%farm_plan/management'] = array(
+    'title' => 'Management',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('farm_forest_plan_management_form', 2),
+    'access callback' => 'farm_forest_plan_access',
+    'access arguments' => array(2),
+    'file' => 'farm_forest.plan.management.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 30,
   );
 
   return $items;
