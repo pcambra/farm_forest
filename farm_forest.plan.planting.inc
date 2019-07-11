@@ -66,6 +66,14 @@ function farm_forest_plan_planting_form($form, &$form_state, $plan) {
       '#type' => 'value',
       '#value' => $planting,
     );
+
+    // If the planting has an ID, add a link to remove it.
+    if (!empty($planting->id)) {
+      $form['plantings'][$planting->id]['remove'] = array(
+        '#type' => 'markup',
+        '#markup' => l(t('Remove'), 'farm/plan/' . $plan->id . '/asset/' . $planting->id . '/delete', array('query' => array('destination' => current_path()))),
+      );
+    }
   }
 
   // Add a blank form for creating a new planting.

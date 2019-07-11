@@ -70,7 +70,7 @@ function farm_forest_plan_area_form($form, &$form_state, $plan) {
     $area_label = entity_label('taxonomy_term', $area);
     $area_uri = entity_uri('taxonomy_term', $area);
     $area_path = $area_uri['path'];
-    $area_list[] = l($area_label, $area_path);
+    $area_list[] = l($area_label, $area_path) . ' <small>(' . l(t('Remove'), 'farm/plan/' . $plan->id . '/area/' . $area->tid . '/remove', array('query' => array('destination' => current_path()))) . ')</small>';
   }
   $form['areas']['#type'] = 'fieldset';
   $form['areas']['#title'] = t('Areas in plan');
