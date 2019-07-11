@@ -9,6 +9,7 @@ dependencies[] = farm_fields
 dependencies[] = farm_log
 dependencies[] = farm_movement
 dependencies[] = farm_plan
+dependencies[] = farm_plan_map
 dependencies[] = farm_quantity
 dependencies[] = features
 dependencies[] = field_group
