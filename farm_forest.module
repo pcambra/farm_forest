@@ -46,7 +46,7 @@ function farm_forest_help($path, $arg) {
 
     // Area selection form.
     case 'farm/plan/%/area':
-      $help = '<p>' . t('Select the area(s) that will be part of this plan.') . '</p>';
+      $help = '<p>' . t('Select the area(s) that will be part of this plan. If they do not exist yet, start by <a href="!add_area">creating a new area</a>.', array('!add_area' => url('admin/structure/taxonomy/farm_areas/add', array('query' => array('destination' => current_path()))))) . '</p>';
       return $help;
 
     // Planting form.
