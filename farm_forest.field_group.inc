@@ -14,10 +14,10 @@ function farm_forest_field_group_info() {
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
-  $field_group->identifier = 'group_farm_areas|farm_plan|forest_plantation|form';
+  $field_group->identifier = 'group_farm_areas|farm_plan|forest|form';
   $field_group->group_name = 'group_farm_areas';
   $field_group->entity_type = 'farm_plan';
-  $field_group->bundle = 'forest_plantation';
+  $field_group->bundle = 'forest';
   $field_group->mode = 'form';
   $field_group->parent_name = 'group_farm_tabs';
   $field_group->data = array(
@@ -35,15 +35,15 @@ function farm_forest_field_group_info() {
       ),
     ),
   );
-  $field_groups['group_farm_areas|farm_plan|forest_plantation|form'] = $field_group;
+  $field_groups['group_farm_areas|farm_plan|forest|form'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
-  $field_group->identifier = 'group_farm_files|farm_plan|forest_plantation|form';
+  $field_group->identifier = 'group_farm_files|farm_plan|forest|form';
   $field_group->group_name = 'group_farm_files';
   $field_group->entity_type = 'farm_plan';
-  $field_group->bundle = 'forest_plantation';
+  $field_group->bundle = 'forest';
   $field_group->mode = 'form';
   $field_group->parent_name = 'group_farm_tabs';
   $field_group->data = array(
@@ -61,15 +61,15 @@ function farm_forest_field_group_info() {
       ),
     ),
   );
-  $field_groups['group_farm_files|farm_plan|forest_plantation|form'] = $field_group;
+  $field_groups['group_farm_files|farm_plan|forest|form'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
-  $field_group->identifier = 'group_farm_general|farm_plan|forest_plantation|form';
+  $field_group->identifier = 'group_farm_general|farm_plan|forest|form';
   $field_group->group_name = 'group_farm_general';
   $field_group->entity_type = 'farm_plan';
-  $field_group->bundle = 'forest_plantation';
+  $field_group->bundle = 'forest';
   $field_group->mode = 'form';
   $field_group->parent_name = 'group_farm_tabs';
   $field_group->data = array(
@@ -88,15 +88,15 @@ function farm_forest_field_group_info() {
       ),
     ),
   );
-  $field_groups['group_farm_general|farm_plan|forest_plantation|form'] = $field_group;
+  $field_groups['group_farm_general|farm_plan|forest|form'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
-  $field_group->identifier = 'group_farm_tabs|farm_plan|forest_plantation|form';
+  $field_group->identifier = 'group_farm_tabs|farm_plan|forest|form';
   $field_group->group_name = 'group_farm_tabs';
   $field_group->entity_type = 'farm_plan';
-  $field_group->bundle = 'forest_plantation';
+  $field_group->bundle = 'forest';
   $field_group->mode = 'form';
   $field_group->parent_name = '';
   $field_group->data = array(
@@ -125,7 +125,7 @@ function farm_forest_field_group_info() {
       ),
     ),
   );
-  $field_groups['group_farm_tabs|farm_plan|forest_plantation|form'] = $field_group;
+  $field_groups['group_farm_tabs|farm_plan|forest|form'] = $field_group;
 
   // Translatables
   // Included for use with string extractors like potx.

@@ -12,22 +12,22 @@ function farm_forest_views_default_views() {
   $export = array();
 
   $view = new view();
-  $view->name = 'farm_forest_plantation_plan';
+  $view->name = 'farm_forest_plan';
   $view->description = '';
   $view->tag = 'default';
   $view->base_table = 'farm_plan';
-  $view->human_name = 'Forest Plantation Plans';
+  $view->human_name = 'Forest Plans';
   $view->core = 7;
   $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
-  $handler->display->display_options['title'] = 'Forest Plantation Plans';
+  $handler->display->display_options['title'] = 'Forest Plans';
   $handler->display->display_options['use_ajax'] = TRUE;
   $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['access']['type'] = 'perm';
-  $handler->display->display_options['access']['perm'] = 'view any forest_plantation farm plans';
+  $handler->display->display_options['access']['perm'] = 'view any forest farm plans';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
@@ -116,7 +116,7 @@ function farm_forest_views_default_views() {
   $handler->display->display_options['filters']['type']['table'] = 'farm_plan';
   $handler->display->display_options['filters']['type']['field'] = 'type';
   $handler->display->display_options['filters']['type']['value'] = array(
-    'forest_plantation' => 'forest_plantation',
+    'forest' => 'forest',
   );
   $handler->display->display_options['filters']['type']['group'] = 1;
   $handler->display->display_options['filters']['type']['expose']['operator_id'] = 'type_op';
@@ -162,14 +162,14 @@ function farm_forest_views_default_views() {
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
-  $handler->display->display_options['path'] = 'farm/plans/plantation';
+  $handler->display->display_options['path'] = 'farm/plans/forest';
   $handler->display->display_options['menu']['type'] = 'normal';
-  $handler->display->display_options['menu']['title'] = 'Forest Plantation Plans';
+  $handler->display->display_options['menu']['title'] = 'Forest Plans';
   $handler->display->display_options['menu']['weight'] = '0';
   $handler->display->display_options['menu']['name'] = 'farm';
   $handler->display->display_options['menu']['context'] = 0;
   $handler->display->display_options['menu']['context_only_inline'] = 0;
-  $export['farm_forest_plantation_plan'] = $view;
+  $export['farm_forest_plan'] = $view;
 
   return $export;
 }

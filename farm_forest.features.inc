@@ -26,9 +26,9 @@ function farm_forest_views_api($module = NULL, $api = NULL) {
  */
 function farm_forest_default_farm_plan_type() {
   $items = array();
-  $items['forest_plantation'] = entity_import('farm_plan_type', '{
-    "type" : "forest_plantation",
-    "label" : "Forest Plantation Plan",
+  $items['forest'] = entity_import('farm_plan_type', '{
+    "type" : "forest",
+    "label" : "Forest Plan",
     "weight" : 0,
     "rdf_mapping" : []
   }');

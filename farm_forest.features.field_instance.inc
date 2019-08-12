@@ -11,9 +11,9 @@
 function farm_forest_field_default_field_instances() {
   $field_instances = array();
 
-  // Exported field_instance: 'farm_plan-forest_plantation-field_farm_area'.
-  $field_instances['farm_plan-forest_plantation-field_farm_area'] = array(
-    'bundle' => 'forest_plantation',
+  // Exported field_instance: 'farm_plan-forest-field_farm_area'.
+  $field_instances['farm_plan-forest-field_farm_area'] = array(
+    'bundle' => 'forest',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => 'What areas are part of this plan?',
@@ -42,9 +42,9 @@ function farm_forest_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'farm_plan-forest_plantation-field_farm_files'.
-  $field_instances['farm_plan-forest_plantation-field_farm_files'] = array(
-    'bundle' => 'forest_plantation',
+  // Exported field_instance: 'farm_plan-forest-field_farm_files'.
+  $field_instances['farm_plan-forest-field_farm_files'] = array(
+    'bundle' => 'forest',
     'deleted' => 0,
     'description' => '',
     'display' => array(
@@ -62,7 +62,7 @@ function farm_forest_field_default_field_instances() {
     'required' => 0,
     'settings' => array(
       'description_field' => 1,
-      'file_directory' => 'farm/plan/forest_plantation',
+      'file_directory' => 'farm/plan/forest',
       'file_extensions' => '',
       'max_filesize' => '',
       'user_register_form' => FALSE,
@@ -78,9 +78,9 @@ function farm_forest_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'farm_plan-forest_plantation-field_farm_notes'.
-  $field_instances['farm_plan-forest_plantation-field_farm_notes'] = array(
-    'bundle' => 'forest_plantation',
+  // Exported field_instance: 'farm_plan-forest-field_farm_notes'.
+  $field_instances['farm_plan-forest-field_farm_notes'] = array(
+    'bundle' => 'forest',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
