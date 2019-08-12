@@ -11,37 +11,6 @@
 function farm_forest_field_default_field_instances() {
   $field_instances = array();
 
-  // Exported field_instance: 'farm_plan-forest-field_farm_area'.
-  $field_instances['farm_plan-forest-field_farm_area'] = array(
-    'bundle' => 'forest',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => 'What areas are part of this plan?',
-    'display' => array(
-      'default' => array(
-        'label' => 'inline',
-        'module' => 'taxonomy',
-        'settings' => array(),
-        'type' => 'taxonomy_term_reference_link',
-        'weight' => 2,
-      ),
-    ),
-    'entity_type' => 'farm_plan',
-    'field_name' => 'field_farm_area',
-    'label' => 'Areas',
-    'required' => 0,
-    'settings' => array(
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 1,
-      'module' => 'options',
-      'settings' => array(),
-      'type' => 'options_select',
-      'weight' => 9,
-    ),
-  );
-
   // Exported field_instance: 'farm_plan-forest-field_farm_files'.
   $field_instances['farm_plan-forest-field_farm_files'] = array(
     'bundle' => 'forest',
@@ -114,10 +83,8 @@ function farm_forest_field_default_field_instances() {
 
   // Translatables
   // Included for use with string extractors like potx.
-  t('Areas');
   t('Files');
   t('Notes');
-  t('What areas are part of this plan?');
 
   return $field_instances;
 }
