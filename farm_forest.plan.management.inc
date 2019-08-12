@@ -283,6 +283,18 @@ function farm_forest_plan_management_form_submit($form, &$form_state) {
       }
     }
 
+    // Get areas associated with the plan.
+    $area_ids = farm_plan_linked_records('area', $plan->id);
+    $areas = array();
+    if (!empty($area_ids)) {
+      foreach ($area_ids as $area_id) {
+        $area = taxonomy_term_load($area_id);
+        if (!empty($area)) {
+          $areas[] = $area;
+        }
+      }
+    }
+
     // Load the log's "done" status.
     $done = !empty($log_values[$key]['done']) ? TRUE : FALSE;
 
@@ -300,12 +312,21 @@ function farm_forest_plan_management_form_submit($form, &$form_state) {
       // Create a new log entity.
       $log = farm_log_create($type, $name, $timestamp, $done, $assets);
 
-      // Add notes to the log and save again.
+      // Load a log entity metadata wrapper.
+      $log_wrapper = entity_metadata_wrapper('log', $log);
+
+      // Add notes to the log.
       if (!empty($log_values[$key]['notes']['value'])) {
-        $log_wrapper = entity_metadata_wrapper('log', $log);
         $log_wrapper->field_farm_notes = $log_values[$key]['notes'];
-        $log_wrapper->save();
       }
+
+      // Add areas to the log.
+      if (!empty($areas)) {
+        $log_wrapper->field_farm_area = $areas;
+      }
+
+      // Save the log again.
+      $log_wrapper->save();
 
       // Link the log to the plan.
       farm_plan_link_record('log', $plan->id, $log->id);
@@ -327,6 +348,9 @@ function farm_forest_plan_management_form_submit($form, &$form_state) {
 
       // Overwrite referenced log assets.
       $log_wrapper->field_farm_asset = $assets;
+
+      // Overwrite reference log areas.
+      $log_wrapper->field_farm_area = $areas;
 
       // Save the notes.
       $log_wrapper->field_farm_notes = $log_values[$key]['notes'];
