@@ -40,7 +40,7 @@ function farm_forest_help($path, $arg) {
     // Plan view page.
     case 'farm/plan/%':
     case 'farm/plan/%/view':
-      $help = '<p>' . t('This page summarizes the details of this forest plan.') . '</p>';
+      $help = '<p>' . t('This page summarizes the details of this forest plan. Select one of the tabs to customize the plan.') . '</p>';
       $help .= '<p>' . t('To edit the plan, click the "Settings" tab.') . '</p>';
       return $help;
 
