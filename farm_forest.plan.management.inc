@@ -263,6 +263,9 @@ function farm_forest_plan_management_form_submit($form, &$form_state) {
   // Get all log values.
   $log_values = $form_state['values']['logs'];
 
+  // Create an array to add logs to.
+  $logs = array();
+
   // Iterate through the log values.
   foreach ($log_values as $key => $values) {
 
@@ -358,5 +361,13 @@ function farm_forest_plan_management_form_submit($form, &$form_state) {
       // Save the log.
       $log_wrapper->save();
     }
+
+    // If a log is available, add it to the array.
+    if (!empty($log)) {
+      $logs[] = $log;
+    }
   }
+
+  // Add logs to the form state storage so future submit handlers can use them.
+  $form_state['storage']['logs'] = $logs;
 }

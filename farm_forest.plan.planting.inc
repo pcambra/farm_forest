@@ -235,6 +235,9 @@ function farm_forest_plan_planting_form_submit($form, &$form_state) {
   // Get the plan.
   $plan = $form_state['values']['plan'];
 
+  // Create an array to add logs to.
+  $logs = array();
+
   // If a new planting species and date are provided, create them.
   if (!empty($form_state['values']['new']['species']) && !empty($form_state['values']['new']['transplanting']['date'])) {
 
@@ -279,6 +282,9 @@ function farm_forest_plan_planting_form_submit($form, &$form_state) {
 
     // Create a new transplanting log, using the movement log helper function.
     $log = farm_movement_create($planting_asset, $areas, $timestamp, 'farm_transplanting', $done);
+
+    // Add the log to the array.
+    $logs[] = $log;
 
     // Link the log to the plan.
     farm_plan_link_record('log', $plan->id, $log->id);
@@ -354,6 +360,9 @@ function farm_forest_plan_planting_form_submit($form, &$form_state) {
         $value = $planting_values['transplanting']['count'];
         farm_quantity_log_update_measurement_by_label($log, 'total planted', $value);
 
+        // Add the log to the array.
+        $logs[] = $log;
+
         // Remember that the transplanting was updated.
         $updated_transplanting = TRUE;
       }
@@ -365,6 +374,9 @@ function farm_forest_plan_planting_form_submit($form, &$form_state) {
         $log = $planting_values['transplanting']['log'];
         $value = $planting_values['transplanting']['spacing'];
         farm_quantity_log_update_measurement_by_label($log, 'tree spacing', $value);
+
+        // Add the log to the array.
+        $logs[] = $log;
 
         // Remember that the transplanting was updated.
         $updated_transplanting = TRUE;
@@ -383,4 +395,7 @@ function farm_forest_plan_planting_form_submit($form, &$form_state) {
       }
     }
   }
+
+  // Add logs to the form state storage so future submit handlers can use them.
+  $form_state['storage']['logs'] = $logs;
 }
