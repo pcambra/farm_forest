@@ -175,6 +175,298 @@ function farm_forest_page_build(&$page) {
 }
 
 /**
+ * Helper function for loading a set of logs for a forest plan.
+ *
+ * @param $plan_id
+ *   The plan ID.
+ * @param $log_types
+ *   An array of acceptable log type machine names.
+ *
+ * @return array
+ *   Returns an array of logs.
+ */
+function farm_forest_plan_logs($plan_id, $log_types) {
+
+  // Load a list of logs associated with this plan.
+  $log_ids = farm_plan_linked_records('log', $plan_id);
+  $logs = array();
+  foreach ($log_ids as $id) {
+    $log = log_load($id);
+    if (!empty($log)) {
+      $logs[] = $log;
+    }
+  }
+
+  // Iterate through the logs and filter out non-matching types.
+  $filtered_logs = array();
+  foreach ($logs as $delta => $log) {
+    if (in_array($log->type, $log_types)) {
+      $filtered_logs[] = $log;
+    }
+  }
+
+  // Sort the logs by timestamp ascending.
+  usort($filtered_logs, 'farm_forest_plan_log_sort');
+
+  // Return the logs.
+  return $filtered_logs;
+}
+
+/**
+ * Log details sub-form.
+ *
+ * @param $log
+ *   The log entity, or NULL.
+ * @param $log_types
+ *   Array of acceptable log type names, keyed by log machine name.
+ * @param $assets
+ *   Asset entities that can be referenced by the log.
+ *
+ * @return array
+ *   Returns a form array that can be used in another form.
+ *
+ * @see farm_forest_plan_management_form().
+ */
+function farm_forest_plan_log_details_form($log=NULL, $log_types, $assets) {
+
+  // Build a fieldset for the form.
+  $form = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  // Save the log to the form values.
+  if (!empty($log)) {
+    $form['log'] = array(
+      '#type' => 'value',
+      '#value' => $log,
+    );
+  }
+
+  // Log type (only selectable for new logs).
+  if (empty($log)) {
+    $form['type'] = array(
+      '#type' => 'select',
+      '#title' => t('Type'),
+      '#options' => $log_types,
+    );
+  }
+
+  // Log name.
+  $log_name = !empty($log->name) ? $log->name : '';
+  $name_autocomplete_types = implode('+', array_keys($log_types));
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Task name'),
+    '#autocomplete_path' => 'log/autocomplete/' . $name_autocomplete_types,
+    '#default_value' => $log_name,
+    '#required' => !empty($log->id),
+  );
+
+  // Date field.
+  $date_format = 'Y-m-d';
+  $log_timestamp = !empty($log->timestamp) ? $log->timestamp : date($date_format);
+  $form['date'] = array(
+    '#type' => 'date_select',
+    '#title' => t('Date'),
+    '#date_format' => $date_format,
+    '#date_label_position' => 'within',
+    '#date_year_range' => '-3:+10',
+    '#default_value' => $log_timestamp,
+    '#required' => !empty($log->id),
+  );
+
+  // Iterate through assets already being referenced by the log, and build an
+  // array of default values.
+  $selected_assets = array();
+  if (!empty($log->field_farm_asset[LANGUAGE_NONE])) {
+    foreach ($log->field_farm_asset[LANGUAGE_NONE] as $asset_ref) {
+
+      // If the target ID is empty, skip it.
+      if (empty($asset_ref['target_id'])) {
+        continue;
+      }
+      $asset_id = $asset_ref['target_id'];
+
+      // Load the asset. If it can't be loaded, skip it.
+      $asset = farm_asset_load($asset_id);
+      if (empty($asset)) {
+        continue;
+      }
+
+      // If the asset is not in $assets, add it.
+      if (!array_key_exists($asset_id, $assets)) {
+        if (!empty($asset)) {
+          $assets[] = $asset;
+        }
+      }
+
+      // Add to the list of selected assets.
+      $selected_assets[$asset_id] = $asset_id;
+    }
+  }
+
+  // Build a list of asset select options.
+  $asset_options = array();
+  foreach ($assets as $asset) {
+    $asset_options[$asset->id] = entity_label('farm_asset', $asset);
+  }
+
+  // If no selected assets were found above, and this is not an existing log,
+  // select all by default.
+  if (empty($selected_assets) && empty($log)) {
+    $selected_assets = array_keys($asset_options);
+  }
+
+  // Select planting assets.
+  if (!empty($asset_options)) {
+    $form['assets'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Plantings'),
+      '#descriptions' => t('Select the planting(s) that this task is associated with.'),
+      '#options' => $asset_options,
+      '#default_value' => $selected_assets,
+      '#weight' => 10,
+    );
+  }
+
+  // Notes.
+  $log_notes = !empty($log->field_farm_notes[LANGUAGE_NONE][0]['value']) ? $log->field_farm_notes[LANGUAGE_NONE][0]['value'] : '';
+  $log_notes_format = !empty($log->field_farm_notes[LANGUAGE_NONE][0]['format']) ? $log->field_farm_notes[LANGUAGE_NONE][0]['format'] : 'farm_format';
+  $form['notes'] = array(
+    '#type' => 'text_format',
+    '#title' => t('Notes'),
+    '#format' => $log_notes_format,
+    '#default_value' => $log_notes,
+    '#weight' => 90,
+  );
+
+  // Done.
+  $log_done = !empty($log->done) ? $log->done : FALSE;
+  $form['done'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('This task is done'),
+    '#default_value' => $log_done,
+    '#weight' => 100,
+  );
+
+  // Return the form array.
+  return $form;
+}
+
+/**
+ * Submit function for the log details sub-form.
+ * This should be called from the submit function of the form that includes
+ * the log details sub-form.
+ *
+ * @param $plan
+ *   The forest plan entity.
+ * @param $log_id
+ *   The log id. If this is a new log, $log_id will be 'new'.
+ * @param $values
+ *   The form state values for a single log details sub-form.
+ */
+function farm_forest_plan_log_details_form_submit($plan, $log_id, $values) {
+
+  // Get the log name.
+  $name = $values['name'];
+
+  // Get the log date as a timestamp.
+  $timestamp = strtotime($values['date']);
+
+  // Load selected assets.
+  $assets = array();
+  if (!empty($values['assets'])) {
+    foreach ($values['assets'] as $asset_id) {
+      $asset = farm_asset_load($asset_id);
+      if (!empty($asset)) {
+        $assets[] = $asset;
+      }
+    }
+  }
+
+  // Get areas associated with the plan.
+  $area_ids = farm_plan_linked_records('area', $plan->id);
+  $areas = array();
+  if (!empty($area_ids)) {
+    foreach ($area_ids as $area_id) {
+      $area = taxonomy_term_load($area_id);
+      if (!empty($area)) {
+        $areas[] = $area;
+      }
+    }
+  }
+
+  // Load the log's "done" status.
+  $done = !empty($values['done']) ? TRUE : FALSE;
+
+  // If this is a new log...
+  if ($log_id == 'new') {
+
+    // Only proceed if a name is set.
+    if (empty($name)) {
+      return;
+    }
+
+    // Get the log type.
+    $type = $values['type'];
+
+    // Create a new log entity.
+    $log = farm_log_create($type, $name, $timestamp, $done, $assets);
+
+    // Load a log entity metadata wrapper.
+    $log_wrapper = entity_metadata_wrapper('log', $log);
+
+    // Add notes to the log.
+    if (!empty($values['notes']['value'])) {
+      $log_wrapper->field_farm_notes = $values['notes'];
+    }
+
+    // Add areas to the log.
+    if (!empty($areas)) {
+      $log_wrapper->field_farm_area = $areas;
+    }
+
+    // Save the log again.
+    $log_wrapper->save();
+
+    // Link the log to the plan.
+    farm_plan_link_record('log', $plan->id, $log->id);
+  }
+
+  // Or, if this is an existing log...
+  else {
+
+    // Get the log entity from form values.
+    $log = $values['log'];
+
+    // Create an entity metadata wrapper.
+    $log_wrapper = entity_metadata_wrapper('log', $log);
+
+    // Set log properties from form values.
+    $log_wrapper->name->set($name);
+    $log_wrapper->timestamp->set($timestamp);
+    $log_wrapper->done->set($done);
+
+    // Overwrite referenced log assets.
+    $log_wrapper->field_farm_asset = $assets;
+
+    // Overwrite referenced log areas.
+    $log_wrapper->field_farm_area = $areas;
+
+    // Save the notes.
+    $log_wrapper->field_farm_notes = $values['notes'];
+
+    // Save the log.
+    $log_wrapper->save();
+  }
+
+  // Return the log.
+  return $log;
+}
+
+/**
  * Log timestamp ascending sort function, for use as a usort() callback.
  */
 function farm_forest_plan_log_sort($loga, $logb) {
