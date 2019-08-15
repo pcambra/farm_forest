@@ -60,7 +60,7 @@ function farm_forest_plan_management_form($form, &$form_state, $plan) {
   }
 
   // Sort the logs by timestamp ascending.
-  usort($management_logs, 'farm_forest_plan_management_log_sort');
+  usort($management_logs, 'farm_forest_plan_log_sort');
 
   // Add fieldsets for each existing management log.
   foreach ($management_logs as $log) {
@@ -92,20 +92,6 @@ function farm_forest_plan_management_form($form, &$form_state, $plan) {
 
   // Return the form.
   return $form;
-}
-
-/**
- * Log timestamp ascending sort function, for use as a usort() callback.
- */
-function farm_forest_plan_management_log_sort($loga, $logb) {
-
-  // If the timestamps are the same, sort by ID (ascending).
-  if ($loga->timestamp == $logb->timestamp) {
-    return ($loga->id < $logb->id) ? -1 : 1;
-  }
-
-  // Otherwise, sort by timestamp (ascending).
-  return ($loga->timestamp < $logb->timestamp) ? -1 : 1;
 }
 
 /**

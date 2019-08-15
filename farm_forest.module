@@ -173,3 +173,17 @@ function farm_forest_page_build(&$page) {
   // Add area selection javascript.
   drupal_add_js(drupal_get_path('module', 'farm_forest') . '/js/farm_forest_plan_area.js');
 }
+
+/**
+ * Log timestamp ascending sort function, for use as a usort() callback.
+ */
+function farm_forest_plan_log_sort($loga, $logb) {
+
+  // If the timestamps are the same, sort by ID (ascending).
+  if ($loga->timestamp == $logb->timestamp) {
+    return ($loga->id < $logb->id) ? -1 : 1;
+  }
+
+  // Otherwise, sort by timestamp (ascending).
+  return ($loga->timestamp < $logb->timestamp) ? -1 : 1;
+}
