@@ -91,6 +91,7 @@ function farm_forest_plan_planting_form($form, &$form_state, $plan) {
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
+    '#weight' => 100,
   );
 
   // Return the form.

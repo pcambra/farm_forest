@@ -83,10 +83,11 @@ function farm_forest_plan_management_form($form, &$form_state, $plan) {
   $form['logs']['new']['#title'] = t('Add a management task');
   $form['logs']['new']['#collapsed'] = $collapsed;
 
-  // Save button.
+  // Submit button for saving all changes.
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
+    '#weight' => 100,
   );
 
   // Return the form.
