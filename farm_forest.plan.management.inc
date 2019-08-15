@@ -129,7 +129,7 @@ function farm_forest_plan_management_log_details_form($log=NULL, $log_types, $as
       '#title' => t('Type'),
       '#descriptions' => t('Will this task be an activity, or a passive observation?'),
       '#options' => $log_types,
-      '#default_value' => 'activity',
+      '#default_value' => 'farm_activity',
     );
   }
 
