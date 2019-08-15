@@ -199,7 +199,7 @@ function farm_forest_plan_planting_details_form($planting=NULL) {
   $system_of_measurement = farm_quantity_system_of_measurement();
   $units = 'meters';
   if ($system_of_measurement == 'us') {
-    $units = 'yards';
+    $units = 'feet';
   }
 
   // Tree spacing.
