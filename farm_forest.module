@@ -134,7 +134,6 @@ function farm_forest_plan_access($plan) {
   return farm_plan_access('update', $plan);
 }
 
-
 /**
  * Implements hook_page_build().
  */
