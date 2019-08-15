@@ -58,6 +58,11 @@ function farm_forest_help($path, $arg) {
     case 'farm/plan/%/management':
       $help = '<p>' . t('Add forest management tasks to the plan.') . '</p>';
       return $help;
+
+    // Harvest form.
+    case 'farm/plan/%/harvest':
+      $help = '<p>' . t('Record harvests associated with this plan.') . '</p>';
+      return $help;
   }
 }
 
@@ -115,6 +120,18 @@ function farm_forest_menu() {
     'file' => 'farm_forest.plan.management.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 30,
+  );
+
+  // Harvest form.
+  $items['farm/plan/%farm_plan/harvest'] = array(
+    'title' => 'Harvest',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('farm_forest_plan_harvest_form', 2),
+    'access callback' => 'farm_forest_plan_access',
+    'access arguments' => array(2),
+    'file' => 'farm_forest.plan.harvest.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 50,
   );
 
   return $items;
@@ -221,13 +238,16 @@ function farm_forest_plan_logs($plan_id, $log_types) {
  *   Array of acceptable log type names, keyed by log machine name.
  * @param $assets
  *   Asset entities that can be referenced by the log.
+ * @param $allow_name
+ *   Boolean: whether or not to allow the log name to be set/edited by the user.
+ *   Defaults to TRUE.
  *
  * @return array
  *   Returns a form array that can be used in another form.
  *
  * @see farm_forest_plan_management_form().
  */
-function farm_forest_plan_log_details_form($log=NULL, $log_types, $assets) {
+function farm_forest_plan_log_details_form($log=NULL, $log_types, $assets, $allow_name=TRUE) {
 
   // Build a fieldset for the form.
   $form = array(
@@ -245,7 +265,16 @@ function farm_forest_plan_log_details_form($log=NULL, $log_types, $assets) {
   }
 
   // Log type (only selectable for new logs).
-  if (empty($log)) {
+  // If only one type is available, set it as a hidden value.
+  if (!empty($log) || count($log_types) == 1) {
+    reset($log_types);
+    $log_type = key($log_types);
+    $form['type'] = array(
+      '#type' => 'value',
+      '#value' => $log_type,
+    );
+  }
+  else {
     $form['type'] = array(
       '#type' => 'select',
       '#title' => t('Type'),
@@ -253,16 +282,24 @@ function farm_forest_plan_log_details_form($log=NULL, $log_types, $assets) {
     );
   }
 
-  // Log name.
-  $log_name = !empty($log->name) ? $log->name : '';
-  $name_autocomplete_types = implode('+', array_keys($log_types));
-  $form['name'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Task name'),
-    '#autocomplete_path' => 'log/autocomplete/' . $name_autocomplete_types,
-    '#default_value' => $log_name,
-    '#required' => !empty($log->id),
-  );
+  // Log name (if allowed).
+  if ($allow_name) {
+    $log_name = !empty($log->name) ? $log->name : '';
+    $name_autocomplete_types = implode('+', array_keys($log_types));
+    $form['name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Task name'),
+      '#autocomplete_path' => 'log/autocomplete/' . $name_autocomplete_types,
+      '#default_value' => $log_name,
+      '#required' => !empty($log->id),
+    );
+  }
+  else {
+    $form['name'] = array(
+      '#type' => 'value',
+      '#value' => !empty($log->name) ? $log->name : '',
+    );
+  }
 
   // Date field.
   $date_format = 'Y-m-d';
@@ -366,11 +403,15 @@ function farm_forest_plan_log_details_form($log=NULL, $log_types, $assets) {
  *   The log id. If this is a new log, $log_id will be 'new'.
  * @param $values
  *   The form state values for a single log details sub-form.
+ * @param $required
+ *   A soft-required field. If this field is not empty, then a new log will be
+ *   created. Defaults to 'name', but should be set to something else in forms
+ *   where the log name is not editable.
+ *
+ * @return object|null
+ *   Returns the log object.
  */
-function farm_forest_plan_log_details_form_submit($plan, $log_id, $values) {
-
-  // Get the log name.
-  $name = $values['name'];
+function farm_forest_plan_log_details_form_submit($plan, $log_id, $values, $required = 'name') {
 
   // Get the log date as a timestamp.
   $timestamp = strtotime($values['date']);
@@ -398,15 +439,18 @@ function farm_forest_plan_log_details_form_submit($plan, $log_id, $values) {
     }
   }
 
+  // Get the log name.
+  $name = $values['name'];
+
   // Load the log's "done" status.
   $done = !empty($values['done']) ? TRUE : FALSE;
 
   // If this is a new log...
   if ($log_id == 'new') {
 
-    // Only proceed if a name is set.
-    if (empty($name)) {
-      return;
+    // Only proceed if the required field is set.
+    if (empty($values[$required])) {
+      return NULL;
     }
 
     // Get the log type.
