@@ -457,6 +457,11 @@ function farm_forest_plan_log_details_form_submit($plan, $log_id, $values, $requ
   // Get the log name.
   $name = $values['name'];
 
+  // Automatically set the name of inventory logs.
+  if (empty($name) && $values['type'] == 'farm_observation') {
+    $name = t('Inventory');
+  }
+
   // Load the log's "done" status.
   $done = !empty($values['done']) ? TRUE : FALSE;
 
