@@ -27,6 +27,7 @@ function farm_forest_plan_management_form($form, &$form_state, $plan) {
   // Define the available management log types.
   $log_types = array(
     'farm_activity' => t('Activity'),
+    'farm_input' => t('Input'),
   );
 
   // Load a list of management logs associated with this plan.
