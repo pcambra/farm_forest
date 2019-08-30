@@ -350,12 +350,12 @@ function farm_forest_plan_log_details_form($log=NULL, $log_types, $assets, $allo
       // If the asset is not in $assets, add it.
       if (!array_key_exists($asset_id, $assets)) {
         if (!empty($asset)) {
-          $assets[] = $asset;
+          $assets[$asset_id] = $asset;
         }
       }
 
       // Add to the list of selected assets.
-      $selected_assets[$asset_id] = $asset_id;
+      $selected_assets[] = $asset_id;
     }
   }
 
