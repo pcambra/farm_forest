@@ -442,14 +442,26 @@ function farm_forest_plan_log_details_form_submit($plan, $log_id, $values, $requ
     }
   }
 
-  // Get areas associated with the plan.
-  $area_ids = farm_plan_linked_records('area', $plan->id);
+  // Load current location(s) (areas) of the plantings.
   $areas = array();
-  if (!empty($area_ids)) {
-    foreach ($area_ids as $area_id) {
-      $area = taxonomy_term_load($area_id);
-      if (!empty($area)) {
+  foreach ($assets as $asset) {
+    $locations = farm_movement_asset_location($asset);
+    if (!empty($locations)) {
+      foreach ($locations as $area) {
         $areas[] = $area;
+      }
+    }
+  }
+
+  // If no planting areas were found, get areas associated with the plan.
+  if (empty($areas)) {
+    $area_ids = farm_plan_linked_records('area', $plan->id);
+    if (!empty($area_ids)) {
+      foreach ($area_ids as $area_id) {
+        $area = taxonomy_term_load($area_id);
+        if (!empty($area)) {
+          $areas[] = $area;
+        }
       }
     }
   }

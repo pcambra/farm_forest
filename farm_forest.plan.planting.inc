@@ -55,7 +55,7 @@ function farm_forest_plan_planting_form($form, &$form_state, $plan) {
   foreach ($plantings as $planting) {
 
     // Add a planting details form.
-    $form['plantings'][$planting->id] = farm_forest_plan_planting_details_form($planting);
+    $form['plantings'][$planting->id] = farm_forest_plan_planting_details_form($plan, $planting);
 
     // Make it a fieldset with a title.
     $form['plantings'][$planting->id]['#type'] = 'fieldset';
@@ -77,7 +77,7 @@ function farm_forest_plan_planting_form($form, &$form_state, $plan) {
   }
 
   // Add a blank form for creating a new planting.
-  $form['new'] = farm_forest_plan_planting_details_form();
+  $form['new'] = farm_forest_plan_planting_details_form($plan);
   $form['new']['#type'] = 'fieldset';
   $form['new']['#title'] = t('Create a planting');
 
@@ -101,6 +101,8 @@ function farm_forest_plan_planting_form($form, &$form_state, $plan) {
 /**
  * Planting details sub-form.
  *
+ * @param $plan
+ *   The plan entity.
  * @param $planting
  *   The planting asset, or NULL.
  *
@@ -109,7 +111,12 @@ function farm_forest_plan_planting_form($form, &$form_state, $plan) {
  *
  * @see farm_forest_plan_planting_form().
  */
-function farm_forest_plan_planting_details_form($planting=NULL) {
+function farm_forest_plan_planting_details_form($plan, $planting=NULL) {
+
+  // If a plan ID is not available, bail.
+  if (empty($plan->id)) {
+    return array();
+  }
 
   // Define the date format.
   $date_format = 'Y-m-d';
@@ -118,9 +125,19 @@ function farm_forest_plan_planting_details_form($planting=NULL) {
   $defaults = array(
     'species' => '',
     'date' => REQUEST_TIME,
+    'areas' => array(),
     'count' => '',
     'spacing' => '',
   );
+
+  // Load areas that are associated with the plan and build a list of form
+  // select options.
+  $area_ids = farm_plan_linked_records('area', $plan->id);
+  $areas = taxonomy_term_load_multiple($area_ids);
+  $area_options = array();
+  foreach ($areas as $area) {
+    $area_options[$area->tid] = entity_label('taxonomy_term', $area);
+  }
 
   // If a planting is provided, load default values.
   $transplanting_log = NULL;
@@ -147,6 +164,41 @@ function farm_forest_plan_planting_details_form($planting=NULL) {
 
       // Get the date.
       $defaults['date'] = $transplanting_log->timestamp;
+
+      // Iterate through areas already being referenced by the log, add them to
+      // the available area options, and build an array of default values.
+      if (!empty($transplanting_log->field_farm_movement[LANGUAGE_NONE][0]['value'])) {
+        $movement = field_collection_item_load($transplanting_log->field_farm_movement[LANGUAGE_NONE][0]['value']);
+        if (!empty($movement->field_farm_move_to[LANGUAGE_NONE])) {
+          foreach ($movement->field_farm_move_to[LANGUAGE_NONE] as $area_ref) {
+
+            // If the term ID is empty, skip it.
+            if (empty($area_ref['tid'])) {
+              continue;
+            }
+            $area_id = $area_ref['tid'];
+
+            // Load the area. If it can't be loaded, skip it.
+            $area = taxonomy_term_load($area_id);
+            if (empty($area)) {
+              continue;
+            }
+
+            // If the area is not in $areas, add it.
+            if (!array_key_exists($area_id, $areas)) {
+              if (!empty($area)) {
+                $areas[$area_id] = $area;
+              }
+            }
+
+            // Add to the list of area options.
+            $area_options[$area_id] = entity_label('taxonomy_term', $area);
+
+            // Add to the list of selected areas.
+            $defaults['areas'][] = $area_id;
+          }
+        }
+      }
 
       // Get the count.
       $count_measure = farm_quantity_log_data($transplanting_log, 'count', t('total planted'));
@@ -184,6 +236,20 @@ function farm_forest_plan_planting_details_form($planting=NULL) {
     '#date_label_position' => 'within',
     '#date_year_range' => '-3:+10',
     '#default_value' => date($date_format, $defaults['date']),
+  );
+
+  // If no selected assets were found above, and this is not an existing log,
+  // select all by default.
+  if (empty($selected_areas) && empty($transplanting_log)) {
+    $defaults['areas'] = array_keys($area_options);
+  }
+
+  // Transplanting areas.
+  $form['transplanting']['areas'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Areas'),
+    '#options' => $area_options,
+    '#default_value' => $defaults['areas'],
   );
 
   // Total trees planted.
@@ -268,9 +334,19 @@ function farm_forest_plan_planting_form_submit($form, &$form_state) {
     $uri = entity_uri('farm_asset', $planting_asset);
     drupal_set_message('Planting created: ' . l($label, $uri['path']));
 
-    // Load areas that are associated with the plan.
-    $area_ids = farm_plan_linked_records('area', $plan->id);
-    $areas = taxonomy_term_load_multiple($area_ids);
+    // Load selected areas.
+    $areas = array();
+    if (!empty($form_state['values']['new']['transplanting']['areas'])) {
+      foreach ($form_state['values']['new']['transplanting']['areas'] as $area_id) {
+        if (empty($area_id)) {
+          continue;
+        }
+        $area = taxonomy_term_load($area_id);
+        if (!empty($area)) {
+          $areas[] = $area;
+        }
+      }
+    }
 
     // Convert the date to a timestamp.
     $timestamp = strtotime($form_state['values']['new']['transplanting']['date']);
@@ -348,6 +424,32 @@ function farm_forest_plan_planting_form_submit($form, &$form_state) {
         $timestamp = strtotime($planting_values['transplanting']['date']);
         $planting_values['transplanting']['log']->timestamp = $timestamp;
         log_save($planting_values['transplanting']['log']);
+
+        // Remember that the transplanting was updated.
+        $updated_transplanting = TRUE;
+      }
+
+      // Sort new selected areas and default selected areas for comparison.
+      $selected_areas = array_values(array_filter($planting_values['transplanting']['areas']));
+      $selected_areas = array_values(array_filter($planting_values['transplanting']['areas']));
+      $default_areas = array_values($form['plantings'][$planting_id]['transplanting']['areas']['#default_value']);
+      sort($selected_areas);
+      sort($default_areas);
+
+      // If the areas changed, update the log.
+      if ($selected_areas != $default_areas) {
+
+        // Load the movement information associated with the log.
+        if (!empty($planting_values['transplanting']['log']->field_farm_movement[LANGUAGE_NONE][0]['value'])) {
+          $movement = field_collection_item_load($planting_values['transplanting']['log']->field_farm_movement[LANGUAGE_NONE][0]['value']);
+          $movement_wrapper = entity_metadata_wrapper('field_collection_item', $movement);
+          $movement_wrapper->field_farm_move_to = array();
+          foreach ($selected_areas as $area_id) {
+            $area = taxonomy_term_load($area_id);
+            $movement_wrapper->field_farm_move_to[] = $area;
+          }
+          $movement_wrapper->save();
+        }
 
         // Remember that the transplanting was updated.
         $updated_transplanting = TRUE;
