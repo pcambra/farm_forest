@@ -346,8 +346,8 @@ function farm_forest_plan_planting_form_submit($form, &$form_state) {
 
         // Update the log timestamp.
         $timestamp = strtotime($planting_values['transplanting']['date']);
-        $planting_values['planting']['transplanting']['log']->timestamp = $timestamp;
-        log_save($planting_values['planting']['transplanting']['log']);
+        $planting_values['transplanting']['log']->timestamp = $timestamp;
+        log_save($planting_values['transplanting']['log']);
 
         // Remember that the transplanting was updated.
         $updated_transplanting = TRUE;
