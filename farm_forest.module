@@ -54,14 +54,14 @@ function farm_forest_help($path, $arg) {
       $help = '<p>' . t('Add planting(s) to this forest plan.') . '</p>';
       return $help;
 
-    // Inventory form.
-    case 'farm/plan/%/inventory':
-      $help = '<p>' . t('Record inventory observations associated with this plan.') . '</p>';
-      return $help;
-
     // Management form.
     case 'farm/plan/%/management':
       $help = '<p>' . t('Add forest management tasks to the plan.') . '</p>';
+      return $help;
+
+    // Inventory form.
+    case 'farm/plan/%/inventory':
+      $help = '<p>' . t('Record inventory observations associated with this plan.') . '</p>';
       return $help;
 
     // Harvest form.
@@ -115,18 +115,6 @@ function farm_forest_menu() {
     'weight' => 20,
   );
 
-  // Inventory form.
-  $items['farm/plan/%farm_plan/inventory'] = array(
-    'title' => 'Inventory',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('farm_forest_plan_inventory_form', 2),
-    'access callback' => 'farm_forest_plan_access',
-    'access arguments' => array(2),
-    'file' => 'farm_forest.plan.inventory.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 30,
-  );
-
   // Management form.
   $items['farm/plan/%farm_plan/management'] = array(
     'title' => 'Management',
@@ -135,6 +123,18 @@ function farm_forest_menu() {
     'access callback' => 'farm_forest_plan_access',
     'access arguments' => array(2),
     'file' => 'farm_forest.plan.management.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 30,
+  );
+
+  // Inventory form.
+  $items['farm/plan/%farm_plan/inventory'] = array(
+    'title' => 'Inventory',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('farm_forest_plan_inventory_form', 2),
+    'access callback' => 'farm_forest_plan_access',
+    'access arguments' => array(2),
+    'file' => 'farm_forest.plan.inventory.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 40,
   );
