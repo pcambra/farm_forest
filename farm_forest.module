@@ -196,16 +196,13 @@ function farm_forest_page_build(&$page) {
   }
 
   // Build the areas map and add it to the page content.
-  $page['content']['farm_areas'] = farm_map_build('farm_areas');
+  $page['content']['farm_areas'] = farm_map_build('farm_forest_areas');
 
   // Set the weight to 100 so that it appears on bottom.
   $page['content']['farm_areas']['#weight'] = 100;
 
   // Set the content region #sorted flag to FALSE so that it resorts.
   $page['content']['#sorted'] = FALSE;
-
-  // Add area selection javascript.
-  drupal_add_js(drupal_get_path('module', 'farm_forest') . '/js/farm_forest_plan_area.js');
 }
 
 /**
