@@ -14,8 +14,8 @@ function farm_forest_help($path, $arg) {
 
   // Add help text to the forest plan list page.
   if ($path == 'farm/plans/forest') {
-    $help = '<p>' . t("This page lists all forest plans. Select one from the list below to view it, or click \"Add forest plan\" to create a new one.") . '</p>';
-    $help .= '<p>' . t("Plans can be archived for future reference. To view archived plans, use the \"Filter/sort\" options in the list below.") . '</p>';
+    $help = '<p>' . t('This page lists all forest plans. Select one from the list below to view it, or click "Add forest plan" to create a new one.') . '</p>';
+    $help .= '<p>' . t('Plans can be archived for future reference. To view archived plans, use the "Filter" options in the list below.') . '</p>';
     return $help;
   }
 
