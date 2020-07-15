@@ -12,12 +12,12 @@ function farm_forest_farm_area_type_info() {
   return array(
     'stand' => array(
       'label' => t('Natural Stand'),
-      'style' => 'farm_map_style_dark_green',
+      'style' => 'darkgreen',
       'weight' => 90,
     ),
     'plantation' => array(
       'label' => t('Plantation'),
-      'style' => 'farm_map_style_green',
+      'style' => 'green',
       'weight' => 80,
     ),
   );
