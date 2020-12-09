@@ -1,25 +1,35 @@
+farm_forest.plan:
+  title: 'Plan'
+  route_name: entity.plan.canonical
+  base_route: entity.plan.canonical
+  weight: 0
+farm_forest.summary:
+  title: 'Summary'
+  route_name: entity.plan.edit_form
+  parent_id: farm_forest.plan
+  weight: 0
 farm_forest.forest:
   title: 'Forest'
   route_name: entity.plan.edit_form
-  base_route: entity.plan.canonical
+  parent_id: farm_forest.plan
   weight: 1
 farm_forest.management:
   title: 'Management'
   route_name: entity.plan.edit_form
-  base_route: entity.plan.canonical
+  parent_id: farm_forest.plan
   weight: 2
 farm_forest.budget:
   title: 'Budget'
   route_name: entity.plan.edit_form
-  base_route: entity.plan.canonical
+  parent_id: farm_forest.plan
   weight: 3
 farm_forest.inventory:
   title: 'Inventory'
   route_name: entity.plan.edit_form
-  base_route: entity.plan.canonical
+  parent_id: farm_forest.plan
   weight: 4
 farm_forest.harvest:
   title: 'Harvest'
   route_name: entity.plan.edit_form
-  base_route: entity.plan.canonical
+  parent_id: farm_forest.plan
   weight: 5
