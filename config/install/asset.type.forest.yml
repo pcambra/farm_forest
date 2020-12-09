@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - farm_forest
+id: forest
+label: Forest
+description: ''
+workflow: asset_default
+new_revision: true
